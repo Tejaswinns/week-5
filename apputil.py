@@ -44,7 +44,16 @@ def survival_demographics(df):
 
 # Visualization function for Streamlit
 import plotly.express as px
-def visualize_demographic():
+def visualize_demographic(df):
+    """
+    Create a bar chart of survival rate for teens by passenger class and sex.
+
+    Args:
+        df (pd.DataFrame): Titanic dataset.
+
+    Returns:
+        plotly.graph_objs._figure.Figure: Bar chart figure.
+    """
     result = survival_demographics(df)
     teen_data = result[result['age_group'] == 'Teen']
     fig = px.bar(

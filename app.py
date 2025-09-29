@@ -17,7 +17,7 @@ st.write("What is the survival rate for teens in all passenger classes?")
 
 # Generate and display the figure
 import plotly.express as px
-fig1 = visualize_demographic()
+fig1 = visualize_demographic(df)
 st.plotly_chart(fig1, use_container_width=True)
 
 st.write(
