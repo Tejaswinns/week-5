@@ -15,8 +15,9 @@ def survival_demographics(df):
     # 1. Create age groups
     age_bins = [0, 12, 19, 59, float('inf')]
     age_labels = ['Child', 'Teen', 'Adult', 'Senior']
+    df = df.copy()
     df['age_group'] = pd.cut(df['Age'], bins=age_bins, labels=age_labels, right=True)
-    df['age_group'] = df['age_group'].astype('category')
+    df['age_group'] = pd.Categorical(df['age_group'], categories=age_labels, ordered=True)
 
     # 2. Group by Pclass, Sex, age_group
     grouped = df.groupby(['Pclass', 'Sex', 'age_group'], observed=False)
@@ -29,16 +30,17 @@ def survival_demographics(df):
     summary['survival_rate'] = (summary['n_survivors'] / summary['n_passengers'] * 100).round(2)
 
     # 4. Ensure all combinations are present
+    all_pclass = sorted(df['Pclass'].unique())
+    all_sex = sorted(df['Sex'].unique())
+    all_age = age_labels
     all_combinations = pd.MultiIndex.from_product(
-        [sorted(df['Pclass'].unique()), df['Sex'].unique(), age_labels],
+        [all_pclass, all_sex, all_age],
         names=['Pclass', 'Sex', 'age_group']
     )
     summary = summary.set_index(['Pclass', 'Sex', 'age_group'])
     summary = summary.reindex(all_combinations, fill_value=0).reset_index()
-
-    # Sort results for readability
+    summary['age_group'] = pd.Categorical(summary['age_group'], categories=age_labels, ordered=True)
     summary = summary.sort_values(by=['Pclass', 'Sex', 'age_group']).reset_index(drop=True)
-
     return summary
 
 
@@ -83,10 +85,8 @@ def family_groups(df):
             - min_fare: Minimum fare in the group
             - max_fare: Maximum fare in the group
     """
-    # Create a new column for family size (siblings/spouses + parents/children + self)
     df = df.copy()
     df['family_size'] = df['SibSp'] + df['Parch'] + 1
-    # Group by family size and class, then aggregate fare statistics
     grouped = df.groupby(['family_size', 'Pclass'], observed=False)
     summary = grouped['Fare'].agg(
         n_passengers='count',
@@ -95,7 +95,7 @@ def family_groups(df):
         max_fare='max'
     ).reset_index()
     summary['avg_fare'] = summary['avg_fare'].round(2)
-    # Sort for readability
+    summary = summary[['family_size', 'Pclass', 'n_passengers', 'avg_fare', 'min_fare', 'max_fare']]
     summary = summary.sort_values(by=['Pclass', 'family_size']).reset_index(drop=True)
     return summary
 
@@ -104,9 +104,8 @@ def last_names(df):
     """
     Returns a pandas Series with last name as index and count as value.
     """
-    # Extract last name from the Name column (before the comma)
-    last_names = df['Name'].str.extract(r'([A-Za-z]+),')[0]
-    # Count occurrences of each last name
+    # Extract last name (allow for letters, spaces, apostrophes, hyphens)
+    last_names = df['Name'].str.extract(r"([A-Za-z'\- ]+),")[0].str.strip()
     return last_names.value_counts()
 
 # Visualization: Most common families by family size
