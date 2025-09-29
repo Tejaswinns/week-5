@@ -11,7 +11,12 @@ st.write(
 
 '''
 )
+
+# Write a clear question for the demographic visualization
+st.write("What is the survival rate for teens in all passenger classes?")
+
 # Generate and display the figure
+import plotly.express as px
 fig1 = visualize_demographic()
 st.plotly_chart(fig1, use_container_width=True)
 
@@ -20,8 +25,10 @@ st.write(
 # Titanic Visualization 2
 '''
 )
+# Write a clear question for the family last name visualization
+st.write("Which are the most common families (last names) on the Titanic, and what are their family sizes?")
 # Generate and display the figure
-fig2 = visualize_families()
+fig2 = visualize_families(df)
 st.plotly_chart(fig2, use_container_width=True)
 
 st.write(
