@@ -1,4 +1,3 @@
-
 import pandas as pd
 # Exercise 1: Survival Demographics
 # Load the Titanic dataset
@@ -34,11 +33,9 @@ def survival_demographics(df=None):
     )
     summary = summary.set_index(['Pclass', 'Sex', 'age_group'])
     summary = summary.reindex(all_combinations, fill_value=0).reset_index()
-    summary['n_passengers'] = summary['n_passengers'].astype(int)
-    summary['n_survivors'] = summary['n_survivors'].astype(int)
-    summary['survival_rate'] = summary.apply(
-        lambda row: 0.0 if row['n_passengers'] == 0 else row['survival_rate'], axis=1
-    )
+    summary['n_passengers'] = summary['n_passengers'].fillna(0).astype(int)
+    summary['n_survivors'] = summary['n_survivors'].fillna(0).astype(int)
+    summary['survival_rate'] = summary['survival_rate'].fillna(0.0).astype(float)
     summary['age_group'] = pd.Categorical(summary['age_group'], categories=age_labels, ordered=True)
     summary = summary[['Pclass', 'Sex', 'age_group', 'n_passengers', 'n_survivors', 'survival_rate']]
     summary = summary.sort_values(by=['Pclass', 'Sex', 'age_group']).reset_index(drop=True)
